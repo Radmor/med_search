@@ -1,0 +1,24 @@
+version: '3'
+services:
+  postgres:
+    image: postgres
+    environment:
+     - PGDATA=/var/lib/postgresql/data
+    volumes:
+     - data:/var/lib/postgresql/data
+  django:
+    build:
+      context: .
+      dockerfile: ./compose/django/Dockerfile
+    command: python src/manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+volumes:
+  .:
+    driver: local
+  data:
+    driver: local
