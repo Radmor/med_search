@@ -1,6 +1,7 @@
 from django.db import models
 from citations.models import Citation
 
+
 class Author(models.Model):
     pmid = models.ForeignKey(Citation, models.DO_NOTHING, db_column='pmid')
     pos = models.SmallIntegerField()

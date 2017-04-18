@@ -1,3 +1,8 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Qualifier
+
+
+@admin.register(Qualifier)
+class QualifierAdmin(admin.ModelAdmin):
+    list_display = ('num', 'sub')
