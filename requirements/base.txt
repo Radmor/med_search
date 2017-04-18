@@ -15,3 +15,4 @@ djangorestframework
 django-rest-auth
 django-allauth
 django-haystack
+drf-haystack

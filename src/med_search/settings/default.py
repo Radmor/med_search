@@ -38,6 +38,11 @@ INSTALLED_APPS = (
 
     'med_search',
     'auth_ex',
+    'authors',
+    'chemicals',
+    'citations',
+    'qualifiers',
+    'sections',
 )
 
 AUTH_USER_MODEL = 'auth_ex.User'
