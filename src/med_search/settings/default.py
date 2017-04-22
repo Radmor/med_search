@@ -35,6 +35,9 @@ INSTALLED_APPS = (
     # 'sendfile',
     'debug_toolbar',
     'registration',
+    'haystack',
+    'elasticsearch',
+
 
     'med_search',
     'auth_ex',
@@ -184,3 +187,11 @@ INTERNAL_IPS = ['127.0.0.1']
 #     'propagate': True,
 #     'formatter': 'simple',
 # }
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': 'http://elasticsearch:9200/',
+        'INDEX_NAME': 'haystack',
+    },
+}

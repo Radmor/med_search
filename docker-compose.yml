@@ -6,6 +6,10 @@ services:
      - PGDATA=/var/lib/postgresql/data
     volumes:
      - data:/var/lib/postgresql/data
+  elasticsearch:
+      image: elasticsearch
+      volumes:
+        - elasticsearch:/usr/share/elasticsearch/data
   django:
     build:
       context: .
@@ -15,10 +19,13 @@ services:
       - .:/code
     depends_on:
       - postgres
+      - elasticsearch
     ports:
       - "8000:8000"
 volumes:
   .:
     driver: local
   data:
+    driver: local
+  elasticsearch:
     driver: local
