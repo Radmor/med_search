@@ -22,8 +22,9 @@ class Citation(models.Model):
 
 
 class Abstract(models.Model):
-    pmid = models.ForeignKey(Citation, models.DO_NOTHING, db_column='pmid')
-    source = models.TextField()  # This field type is a guess.
+    id = models.BigAutoField(primary_key=True)
+    pmid = models.ForeignKey(Citation, models.DO_NOTHING, db_column='pmid', blank=True, null=True)
+    source = models.TextField(blank=True, null=True)  # This field type is a guess.
     copyright = models.TextField(blank=True, null=True)
 
     class Meta:
@@ -32,9 +33,10 @@ class Abstract(models.Model):
         unique_together = (('pmid', 'source'),)
 
 class Database(models.Model):
-    pmid = models.ForeignKey(Citation, models.DO_NOTHING, db_column='pmid')
-    name = models.CharField(max_length=256)
-    accession = models.CharField(max_length=256)
+    id = models.BigAutoField(primary_key=True)
+    pmid = models.ForeignKey(Citation, models.DO_NOTHING, db_column='pmid', blank=True, null=True)
+    name = models.CharField(max_length=256, blank=True, null=True)
+    accession = models.CharField(max_length=256, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -43,8 +45,9 @@ class Database(models.Model):
 
 
 class Descriptor(models.Model):
-    pmid = models.ForeignKey(Citation, models.DO_NOTHING, db_column='pmid')
-    num = models.SmallIntegerField()
+    id = models.BigAutoField(primary_key=True)
+    pmid = models.ForeignKey(Citation, models.DO_NOTHING, db_column='pmid', blank=True, null=True)
+    num = models.SmallIntegerField(blank=True, null=True)
     major = models.BooleanField()
     name = models.TextField()
 
@@ -55,8 +58,9 @@ class Descriptor(models.Model):
 
 
 class Identifier(models.Model):
-    pmid = models.ForeignKey(Citation, models.DO_NOTHING, db_column='pmid')
-    namespace = models.CharField(max_length=32)
+    id = models.BigAutoField(primary_key=True)
+    pmid = models.ForeignKey(Citation, models.DO_NOTHING, db_column='pmid', blank=True, null=True)
+    namespace = models.CharField(max_length=32, blank=True, null=True)
     value = models.CharField(max_length=256)
 
     class Meta:
@@ -66,9 +70,10 @@ class Identifier(models.Model):
 
 
 class Keyword(models.Model):
-    pmid = models.ForeignKey(Citation, models.DO_NOTHING, db_column='pmid')
-    owner = models.TextField()  # This field type is a guess.
-    cnt = models.SmallIntegerField()
+    id = models.BigAutoField(primary_key=True)
+    pmid = models.ForeignKey(Citation, models.DO_NOTHING, db_column='pmid', blank=True, null=True)
+    owner = models.TextField(blank=True, null=True)  # This field type is a guess.
+    cnt = models.SmallIntegerField(blank=True, null=True)
     major = models.BooleanField()
     name = models.TextField()
 
@@ -79,8 +84,9 @@ class Keyword(models.Model):
 
 
 class PublicationType(models.Model):
-    pmid = models.ForeignKey(Citation, models.DO_NOTHING, db_column='pmid')
-    value = models.CharField(max_length=256)
+    id = models.BigAutoField(primary_key=True)
+    pmid = models.ForeignKey(Citation, models.DO_NOTHING, db_column='pmid', blank=True, null=True)
+    value = models.CharField(max_length=256, blank=True, null=True)
 
     class Meta:
         managed = False
