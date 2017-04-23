@@ -4,7 +4,7 @@ from citations.models import Citation
 
 class Section(models.Model):
     id = models.BigAutoField(primary_key=True)
-    pmid = models.ForeignKey(Citation, models.DO_NOTHING, db_column='pmid', blank=True, null=True)
+    pmid = models.ForeignKey(Citation, models.DO_NOTHING, db_column='pmid', blank=True, null=True, related_name='sections')
     source = models.TextField(blank=True, null=True)  # This field type is a guess.
     seq = models.SmallIntegerField(blank=True, null=True)
     name = models.CharField(max_length=64)

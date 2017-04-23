@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'registration',
     'haystack',
     'elasticsearch',
+    'rest_framework',
 
 
     'med_search',
