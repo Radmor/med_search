@@ -13,4 +13,4 @@ class CitationSerializer(serializers.ModelSerializer):
 class CitationIndexSerializer(HaystackSerializer):
     class Meta:
         index_classes = (CitationIndex,)
-        fields = ('title',)
+        fields = ('title','content')

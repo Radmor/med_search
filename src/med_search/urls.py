@@ -5,9 +5,11 @@ from django.contrib import admin
 from rest_framework import routers
 
 import citations.api
+import search.api
 
 router = routers.SimpleRouter()
-search_router = routers.SimpleRouter()
+search_router = routers.DefaultRouter()
+
 
 router.register(
     'citations', citations.api.CitationViewSet, 'citations'
@@ -15,10 +17,12 @@ router.register(
 search_router.register(
     'citations', citations.api.CitationIndexViewSet, 'citations'
 )
+
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'api/', include(router.urls)),
-    url(r'search/', include(search_router.urls)),
+    url(r'^api/', include(router.urls, namespace="api")),
+    url(r'^search/$', search.api.SearchView.as_view(), name="search"),
+    url(r'^search/', include(search_router.urls, namespace="search")),
 ]
 
 if 'rosetta' in settings.INSTALLED_APPS:
