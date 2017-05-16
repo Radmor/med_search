@@ -1,6 +1,9 @@
 import urllib
 from collections import defaultdict
 from itertools import chain
+import nltk
+from nltk.corpus import stopwords
+
 
 def merge_dicts(dict1, dict2):
     dict3 = defaultdict(list)
@@ -11,7 +14,14 @@ def merge_dicts(dict1, dict2):
 
 
 def parse_query(query):
-    return query.split()
+    tokenized_query = nltk.word_tokenize(query)
+    lower_case_tokenized_query = [w.lower() for w in tokenized_query]
+    tokenized_query_without_stopwords = [w for w in lower_case_tokenized_query if w not in stopwords.words('english')]
+    print(tokenized_query_without_stopwords)
+    stemmer = nltk.stem.PorterStemmer()
+    stemmed_query = [stemmer.stem(word) for word in tokenized_query_without_stopwords]
+    print(stemmed_query)
+    return stemmed_query
 
 
 def parse_query_string(parsed_query, queried_fields):
@@ -23,7 +33,14 @@ def parse_query_string(parsed_query, queried_fields):
     return urllib.parse.urlencode(query_string_dict, True)
 
 
+def download_needed_packages_from_nltk():
+    pass
+    # nltk.download('punkt')
+    # nltk.download('stopwords')
+
+
 def combine_redirect_url(redirect_url, query, queried_fields):
+    download_needed_packages_from_nltk()
     parsed_query = parse_query(query)
     query_string = parse_query_string(parsed_query, queried_fields)
     redirect_parsed_url = urllib.parse.urlparse(redirect_url)
