@@ -14,7 +14,6 @@ class SearchView(views.APIView):
     queried_fields = ('title',)
     redirect_url = reverse_lazy('search:citations-list')
 
-
     def post(self, request, format=None):
         serializer = SearchSerializer(data=request.data)
         if serializer.is_valid():

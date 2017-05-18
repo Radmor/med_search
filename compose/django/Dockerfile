@@ -8,5 +8,6 @@ ADD requirements/base.txt /code/
 ADD requirements/dev.txt /code/
 RUN pip install -r base.txt -r dev.txt
 ADD . /code/
-
+RUN python -m nltk.downloader punkt
+RUN python -m nltk.downloader stopwords
 WORKDIR /code
