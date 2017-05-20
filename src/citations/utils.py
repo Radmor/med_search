@@ -16,12 +16,12 @@ def cosine_similarity(terms_in_query, terms_in_result):
 def term_frequency(query, result):
     terms_in_query = {}
     terms_in_result = {}
-    query_as_a_list = query.split()
     result_as_a_list = result.split()
-    for term in query_as_a_list:
-        terms_in_query[term] = terms_in_query.get(term, 0) + 1
+    for key, terms_list in query.items():
+        for term in terms_list:
+            terms_in_query[term] = terms_in_query.get(term, 0) + 1
     for term in terms_in_query.keys():
-        terms_in_query[term] /= len(query_as_a_list)
+        terms_in_query[term] /= len(query)
         terms_in_result[term] = terms_in_result.get(term, 0)
         for word in result_as_a_list:
             if term == word:
@@ -42,4 +42,4 @@ def tfidf(query, result):
 
 
 if __name__ == '__main__':
-    term_frequency("cancer cancer boom trick", "cancer boom lol cool boom thing")
+    term_frequency({"query": ["cancer", "cancer", "boom", "trick"]}, "cancer boom lol cool boom thing")
