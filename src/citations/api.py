@@ -18,11 +18,13 @@ class CitationIndexViewSet(HaystackViewSet):
     index_models = (Citation,)
     serializer_class = CitationIndexSerializer
 
-    def get_queryset(self, **kwargs):
-        obj = super(CitationIndexViewSet, self).get_queryset()
-        obj = sorted(obj, key=lambda result: term_frequency(result))
-        print(len(obj))
-        # import pdb
-        # pdb.set_trace()
-        print(len(Citation.objects.all()))
-        return obj
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+
+        found_articles = response.data
+
+        # perform computations here
+
+        response.data = found_articles
+        return response
+
