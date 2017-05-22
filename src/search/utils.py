@@ -5,7 +5,6 @@ import nltk
 from nltk.corpus import stopwords
 
 
-
 def merge_dicts(dict1, dict2):
     dict3 = defaultdict(list)
     for k, v in chain(dict1.items(), dict2.items()):
@@ -34,16 +33,22 @@ def parse_query_string(parsed_query, queried_fields):
     return urllib.parse.urlencode(query_string_dict, True)
 
 
-def download_needed_packages_from_nltk():
-    pass
-    # nltk.download('punkt')
-    # nltk.download('stopwords')
+def join_with_next_parameter(query_string, field_name, field_value):
+    """
+    This method joins previous query_string with new parameter.
+    :param query_string: previously prepared query_string
+    :param field_name: name of the parameter
+    :param field_value: value of the parameter to be added to url
+    :return: 
+    """
+    return query_string + "&" + field_name + "=" + field_value
 
 
-def combine_redirect_url(redirect_url, query, queried_fields):
-    download_needed_packages_from_nltk()
+def combine_redirect_url(redirect_url, query, filtering_method, comparison_method, queried_fields):
     parsed_query = parse_query(query)
     query_string = parse_query_string(parsed_query, queried_fields)
+    query_string = join_with_next_parameter(query_string, "filtering_method", filtering_method)
+    query_string = join_with_next_parameter(query_string, "comparison_method", comparison_method)
     redirect_parsed_url = urllib.parse.urlparse(redirect_url)
     redirect_parsed_url = redirect_parsed_url._replace(query=query_string)
     return urllib.parse.urlunparse(redirect_parsed_url)
