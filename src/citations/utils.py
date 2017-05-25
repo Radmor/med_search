@@ -3,7 +3,7 @@ import nltk
 from nltk.corpus import stopwords
 
 DESCRIBING_METHODS = {'tf': 'term_frequency', 'tfidf': 'term_frequency_inverse_document_frequency'}
-COMPARISON_METHODS = {'cos': 'cosine_similarity'}
+COMPARISON_METHODS = {'cos': 'cosine_similarity', 'euc': 'euclidean_distance_similarity'}
 
 
 def length_of_vector(list_of_values):
@@ -14,6 +14,13 @@ def cosine_similarity(terms_in_query, terms_in_result):
     scalar_product = sum([terms_in_result[term] * terms_in_query[term] for term in terms_in_result.keys()])
     product_of_the_lengths_of_vectors = length_of_vector(terms_in_query.values()) * length_of_vector(terms_in_result.values())
     return (scalar_product / product_of_the_lengths_of_vectors) if product_of_the_lengths_of_vectors != 0 else 0
+
+
+def euclidean_distance_similarity(terms_in_query, terms_in_result):
+    """
+    sqrt from sum of squares of differences of coordinates
+    """
+    return math.sqrt(sum([(terms_in_result[term] - terms_in_query[term])**2 for term in terms_in_result.keys()]))
 
 
 def measure_similarity(documents, query, result, content_describing_method, comparison_method):
@@ -82,3 +89,4 @@ if __name__ == '__main__':
     # print(measure_similarity([], ['cancer', 'symptom'], {"title": "cancer lol lol lol lol lol symptom"}, DESCRIBING_METHODS["tf"], COMPARISON_METHODS['cos']))
     # print(([], ['cancer', 'symptom'], {"title": "cancer lol lol lol lol lol"}, "cos"))
     # print(([], ["cancer", "cancer", "boom", "trick"], {"title": "cancer boom lol cool boom thing"}, "cos"))
+    print(euclidean_distance_similarity({'a': 0.0, 'b': 0.0}, {'a': 1.0, 'b': 1.0}))
