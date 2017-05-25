@@ -3,7 +3,8 @@ from drf_haystack.viewsets import HaystackViewSet
 
 from .serializers import CitationSerializer, CitationIndexSerializer
 from .models import Citation
-from .utils import term_frequency, COMPARISON_METHODS
+from .utils import measure_similarity, COMPARISON_METHODS, DESCRIBING_METHODS
+
 
 
 class CitationViewSet(viewsets.ModelViewSet):
@@ -24,16 +25,18 @@ class CitationIndexViewSet(HaystackViewSet):
         comparison_method = self.request.query_params['comparison_method']
         query = self.request.query_params.getlist('title')
         found_articles = response.data
+        print(len(found_articles))
+        print(filtering_method, comparison_method)
+        all_titles = Citation.objects.values_list('title', flat=True)
         # perform computations here
-        if filtering_method == 'tf':
-            if comparison_method in COMPARISON_METHODS:
+        if filtering_method in DESCRIBING_METHODS.keys() and comparison_method in COMPARISON_METHODS.keys():
                 found_articles = \
                     sorted(found_articles,
-                           key=lambda result: term_frequency(documents=Citation.objects.all(),
-                                                             query=query,
-                                                             result=result,
-                                                             filtering_method=filtering_method,
-                                                             comparison_method=COMPARISON_METHODS[comparison_method]))
+                           key=lambda result: measure_similarity(documents=all_titles,
+                                                                 query=query,
+                                                                 result=result,
+                                                                 content_describing_method =DESCRIBING_METHODS[filtering_method],
+                                                                 comparison_method=COMPARISON_METHODS[comparison_method]))
         response.data = found_articles
         return response
 

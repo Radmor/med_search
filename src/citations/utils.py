@@ -1,5 +1,8 @@
 import math
+import nltk
+from nltk.corpus import stopwords
 
+DESCRIBING_METHODS = {'tf': 'term_frequency', 'tfidf': 'term_frequency_inverse_document_frequency'}
 COMPARISON_METHODS = {'cos': 'cosine_similarity'}
 
 
@@ -8,7 +11,6 @@ def length_of_vector(list_of_values):
 
 
 def cosine_similarity(terms_in_query, terms_in_result):
-    print(terms_in_query, terms_in_result)
     scalar_product = sum([terms_in_result[term] * terms_in_query[term] for term in terms_in_result.keys()])
     product_of_the_lengths_of_vectors = length_of_vector(terms_in_query.values()) * length_of_vector(terms_in_result.values())
     return (scalar_product / product_of_the_lengths_of_vectors) if product_of_the_lengths_of_vectors != 0 else 0
@@ -24,18 +26,18 @@ def measure_similarity(documents, query, result, content_describing_method, comp
     :param comparison_method: name of method to use to compare document and query
     :return: number [0:1] indicating how similar query and document are
     """
+    result_as_a_list = parse_query(result['title'])
     possibles = globals().copy()
     possibles.update(locals())
     describe = possibles.get(content_describing_method)
-    terms_in_query, terms_in_result = describe(documents, query, result)
+    terms_in_query, terms_in_result = describe(documents, query, result_as_a_list)
     comparing = possibles.get(comparison_method)
     return comparing(terms_in_query, terms_in_result)
 
 
-def tf(documents, query, result):
+def term_frequency(documents, query, result_as_a_list):
     terms_in_query = {}
     terms_in_result = {}
-    result_as_a_list = result['title'].split()
     for term in query:
         terms_in_query[term] = terms_in_query.get(term, 0) + 1
     for term in terms_in_query.keys():
@@ -49,15 +51,34 @@ def tf(documents, query, result):
     return terms_in_query, terms_in_result
 
 
-def idf(documents, word):
-    return math.log(len(documents)/sum([1 for w in documents if word in w]))
+def inverse_document_frequency(documents, word):
+    sum_of_occurrences = sum([1 for w in documents if word in w])
+    if sum_of_occurrences != 0:
+        return math.log((len(documents) + 1)/sum_of_occurrences)
+    return 0
 
 
-def tfidf(documents, query, result):
-    pass
+def term_frequency_inverse_document_frequency(documents, query, result):
+    terms_in_query, terms_in_result = term_frequency(documents, query, result)
+    terms_in_query = {word: tf * inverse_document_frequency(documents, word) for word, tf in terms_in_query.items()}
+    terms_in_result = {word: tf * inverse_document_frequency(documents, word) for word, tf in terms_in_result.items()}
+    return terms_in_query, terms_in_result
+
+
+def parse_query(query):
+    tokenized_query = nltk.word_tokenize(query)
+    lower_case_tokenized_query = [w.lower() for w in tokenized_query]
+    tokenized_query_without_stopwords = [w for w in lower_case_tokenized_query if w not in stopwords.words('english')]
+    stemmer = nltk.stem.PorterStemmer()
+    stemmed_query = [stemmer.stem(word) for word in tokenized_query_without_stopwords]
+    return stemmed_query
 
 
 if __name__ == '__main__':
-    print(measure_similarity([], ['cancer', 'symptom'], {"title": "cancer lol lol lol lol lol symptom"}, "tf", COMPARISON_METHODS['cos']))
+    # There is a working example of tfidf
+    print(term_frequency_inverse_document_frequency([['aa', 'ab', 'ac'], ['aa', 'ab', 'aa'], ['aa', 'ad', 'ab', 'ac', 'ad'], ['ab','ab','ab']], ['aa', 'ab', 'ac'], {'title': 'aa ad ab ac ad'}))
+    print(1/3*math.log(5/3), 1/3*math.log(5/4), 1/3*math.log(5/2))
+    print(0.2 * math.log(5 / 3), 0.2 * math.log(5 / 4), 0.2 * math.log(5 / 2))
+    # print(measure_similarity([], ['cancer', 'symptom'], {"title": "cancer lol lol lol lol lol symptom"}, DESCRIBING_METHODS["tf"], COMPARISON_METHODS['cos']))
     # print(([], ['cancer', 'symptom'], {"title": "cancer lol lol lol lol lol"}, "cos"))
     # print(([], ["cancer", "cancer", "boom", "trick"], {"title": "cancer boom lol cool boom thing"}, "cos"))
