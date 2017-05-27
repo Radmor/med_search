@@ -6,10 +6,7 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 
 from .serializers import SearchSerializer, SearchConfigSerializer
-from .utils import combine_redirect_url
-
-DESCRIBING_METHODS = {'tf': 'term_frequency', 'tfidf': 'term_frequency_inverse_document_frequency'}
-COMPARISON_METHODS = {'cos': 'cosine_similarity'}
+from .utils import combine_redirect_url, DESCRIBING_METHODS, COMPARISON_METHODS
 
 
 class SearchView(views.APIView):

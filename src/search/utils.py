@@ -4,6 +4,8 @@ from itertools import chain
 import nltk
 from nltk.corpus import stopwords
 
+DESCRIBING_METHODS = {'tf': 'term_frequency', 'tfidf': 'term_frequency_inverse_document_frequency'}
+COMPARISON_METHODS = {'cos': 'cosine_similarity', 'euc': 'euclidean_distance_similarity'}
 
 def merge_dicts(dict1, dict2):
     dict3 = defaultdict(list)
