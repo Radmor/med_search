@@ -18,3 +18,4 @@ django-allauth
 django-haystack
 drf-haystack
 elasticsearch==2.4.1
+django-cors-headers

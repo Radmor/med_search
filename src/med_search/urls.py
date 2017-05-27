@@ -18,6 +18,10 @@ search_router.register(
     'citations', citations.api.CitationIndexViewSet, 'citations'
 )
 
+search_router.register(
+    'config', search.api.SearchConfigViewSet, 'config'
+)
+
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include(router.urls, namespace="api")),

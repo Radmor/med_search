@@ -1,0 +1,4 @@
+{{ object.title }}
+{% for s in object.sections.all %}
+{{ s.content }}
+{% endfor %}
