@@ -1,12 +1,12 @@
-from rest_framework import views, permissions
+from rest_framework import views, viewsets, permissions
 from rest_framework.response import Response
 from rest_framework import status
 
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 
-from .serializers import SearchSerializer
-from .utils import combine_redirect_url
+from .serializers import SearchSerializer, SearchConfigSerializer
+from .utils import combine_redirect_url, DESCRIBING_METHODS, COMPARISON_METHODS
 
 
 class SearchView(views.APIView):
@@ -27,3 +27,13 @@ class SearchView(views.APIView):
                                                  comparison_method,
                                                  self.queried_fields), permanent=True)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class SearchConfigViewSet(viewsets.ViewSet):
+    def list(self, request):
+        
+        serializer = SearchConfigSerializer({
+            'filtering_methods': DESCRIBING_METHODS.values(),
+            'comparison_methods': COMPARISON_METHODS.values(),
+        })
+
+        return Response(serializer.data)

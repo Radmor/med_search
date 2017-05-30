@@ -2,6 +2,7 @@ import math
 import nltk
 from nltk.corpus import stopwords
 
+# from search.utils import DESCRIBING_METHODS, COMPARISON_METHODS
 DESCRIBING_METHODS = {'tf': 'term_frequency', 'tfidf': 'term_frequency_inverse_document_frequency'}
 COMPARISON_METHODS = {'cos': 'cosine_similarity', 'euc': 'euclidean_distance_similarity', 'jac': 'jaccard_similarity'}
 

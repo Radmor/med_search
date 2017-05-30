@@ -28,7 +28,6 @@ class CitationIndexViewSet(HaystackViewSet):
         print(len(found_articles))
         print(filtering_method, comparison_method)
         all_titles = Citation.objects.values_list('title', flat=True)
-        # perform computations here
         if filtering_method in DESCRIBING_METHODS.keys() and comparison_method in COMPARISON_METHODS.keys():
                 found_articles = \
                     sorted(found_articles,
