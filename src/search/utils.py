@@ -46,11 +46,14 @@ def join_with_next_parameter(query_string, field_name, field_value):
     return query_string + "&" + field_name + "=" + field_value
 
 
-def combine_redirect_url(redirect_url, query, filtering_method, comparison_method, queried_fields):
+def combine_redirect_url(redirect_url, query, filtering_method, comparison_method, terms_weights, queried_fields):
     parsed_query = parse_query(query)
     query_string = parse_query_string(parsed_query, queried_fields)
     query_string = join_with_next_parameter(query_string, "filtering_method", filtering_method)
     query_string = join_with_next_parameter(query_string, "comparison_method", comparison_method)
+    
+    for term, weight in terms_weights.items():
+        query_string = join_with_next_parameter(query_string, term, str(weight))
     redirect_parsed_url = urllib.parse.urlparse(redirect_url)
     redirect_parsed_url = redirect_parsed_url._replace(query=query_string)
     return urllib.parse.urlunparse(redirect_parsed_url)

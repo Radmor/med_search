@@ -5,6 +5,7 @@ class SearchSerializer(serializers.Serializer):
     query = serializers.CharField()
     filtering_method = serializers.CharField()
     comparison_method = serializers.CharField()
+    terms_weights = serializers.DictField(child=serializers.FloatField())
 
 
 class SearchConfigSerializer(serializers.Serializer):
