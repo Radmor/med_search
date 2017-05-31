@@ -26,9 +26,7 @@ class CitationIndexViewSet(HaystackViewSet):
         query = self.request.query_params.getlist('title')
         
         found_articles = response.data
-        terms_weights = {term: self.request.query_params.get(term) for term in query}
-        print(len(found_articles))
-        print(filtering_method, comparison_method)
+        terms_weights = {term: self.request.query_params.get(term, 0) for term in query}
         all_titles = Citation.objects.values_list('title', flat=True)
         if filtering_method in DESCRIBING_METHODS.keys() and comparison_method in COMPARISON_METHODS.keys():
                 found_articles = \
@@ -38,6 +36,6 @@ class CitationIndexViewSet(HaystackViewSet):
                                                                  result=result,
                                                                  content_describing_method =DESCRIBING_METHODS[filtering_method],
                                                                  comparison_method=COMPARISON_METHODS[comparison_method]))
-        response.data = found_articles
+        response.data = {'results': found_articles, 'terms_weights': terms_weights }
         return response
 
