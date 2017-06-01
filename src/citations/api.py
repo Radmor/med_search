@@ -36,6 +36,6 @@ class CitationIndexViewSet(HaystackViewSet):
                                                                  content_describing_method =DESCRIBING_METHODS[filtering_method],
                                                                  comparison_method=COMPARISON_METHODS[comparison_method],
                                                                  weights_of_terms=terms_weights))
-        response.data = {'results': found_articles, 'terms_weights': terms_weights }
+        response.data = {'results': found_articles, 'terms_weights': terms_weights}
         return response
 

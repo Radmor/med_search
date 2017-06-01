@@ -121,7 +121,6 @@ def create_matrix_from_ranking(reference_ranking):
         for elem in reference_ranking[index:]:
             if elem != element:
                 matrix[element][elem] = 1
-    print(matrix)
     return matrix
 
 
@@ -142,6 +141,29 @@ def compute_kendall_tau(reference_ranking, actual_ranking):
     return 1 - 4*(distance_between_matrices/(len(reference_matrix)*(len(reference_matrix)-1)))
 
 
+def rocchios_method(alpha, beta, gamma, query_as_a_vector, list_of_relevant_documents_vectors, list_of_unrelevant_documents_vectors):
+    query_as_a_vector_times_alpha = [value * alpha for value in query_as_a_vector]
+    relevant_documents_times_beta = [0]*len(list_of_relevant_documents_vectors[0])
+    if len(list_of_unrelevant_documents_vectors) > 0:
+        unrelevant_documents_times_gamma = [0] * len(list_of_unrelevant_documents_vectors[0])
+    for vector in list_of_relevant_documents_vectors:
+        for index, value in enumerate(vector):
+            relevant_documents_times_beta[index] += beta * value
+    if len(list_of_unrelevant_documents_vectors) > 0:
+
+        for vector in list_of_unrelevant_documents_vectors:
+            for index, value in enumerate(vector):
+                unrelevant_documents_times_gamma[index] += gamma * value
+    new_query_vector = [0]*len(query_as_a_vector)
+    if len(list_of_unrelevant_documents_vectors) > 0:
+        for index in range(len(new_query_vector)):
+            new_query_vector[index] += query_as_a_vector_times_alpha[index] + relevant_documents_times_beta[index] + unrelevant_documents_times_gamma[index]
+    else:
+        for index in range(len(new_query_vector)):
+            new_query_vector[index] += query_as_a_vector_times_alpha[index] + relevant_documents_times_beta[index]
+    return new_query_vector
+
+
 if __name__ == '__main__':
     # print(term_frequency([], ['aa', 'ab', 'ac', 'aa', 'ad'],['aa', 'ba', 'bb', 'ac']))
     # print(jaccard_similarity({'aa': 0.4, 'ab': 0.2, 'ad': 0.2, 'ba': 0.0, 'bb': 0.0, 'ac': 0.2}, {'aa': 0.25, 'ab': 0.0, 'ad': 0.0, 'ba': 0.25, 'bb': 0.25, 'ac': 0.25}))
@@ -154,3 +176,4 @@ if __name__ == '__main__':
     # print(([], ['cancer', 'symptom'], {"title": "cancer lol lol lol lol lol"}, "cos"))
     # print(([], ["cancer", "cancer", "boom", "trick"], {"title": "cancer boom lol cool boom thing"}, "cos"))
     # print(euclidean_distance_similarity({'a': 0.0, 'b': 0.0}, {'a': 1.0, 'b': 1.0}))
+    print(rocchios_method(1, 0.5, 0, [0,0,0,0.932,0.363], [[0,0,0,0,0],[0,0,0.559,0.0],[0.89,0,0,0,0]], []))
