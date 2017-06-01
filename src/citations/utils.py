@@ -7,48 +7,69 @@ DESCRIBING_METHODS = {'tf': 'term_frequency', 'tfidf': 'term_frequency_inverse_d
 COMPARISON_METHODS = {'cos': 'cosine_similarity', 'euc': 'euclidean_distance_similarity', 'jac': 'jaccard_similarity'}
 
 
-def length_of_vector(list_of_values):
-    return math.sqrt(sum([x*x for x in list_of_values]))
+def length_of_vector(terms_and_values, terms_weights):
+    if len(terms_weights.values()) == 0:
+        return math.sqrt(sum([x*x for x in terms_and_values.items()]))
+    return math.sqrt(sum([min(1, x*x/terms_weights[term]) for term, x in terms_and_values.items()]))
 
 
-def cosine_similarity(terms_in_query, terms_in_result):
+def cosine_similarity(terms_in_query, terms_in_result, terms_weights):
     scalar_product = sum([terms_in_result[term] * terms_in_query[term] for term in terms_in_result.keys()])
-    product_of_the_lengths_of_vectors = length_of_vector(terms_in_query.values()) * length_of_vector(terms_in_result.values())
+    product_of_the_lengths_of_vectors = length_of_vector(terms_in_query, terms_weights) * length_of_vector(terms_in_result, terms_weights)
     return (scalar_product / product_of_the_lengths_of_vectors) if product_of_the_lengths_of_vectors != 0 else 0
 
 
-def euclidean_distance_similarity(terms_in_query, terms_in_result):
+def euclidean_distance_similarity(terms_in_query, terms_in_result, terms_weights):
     """
     sqrt from sum of squares of differences of coordinates
     """
-    return math.sqrt(sum([(terms_in_result[term] - terms_in_query[term])**2 for term in terms_in_result.keys()]))
+    if len(terms_weights.values()) == 0:
+        return math.sqrt(sum([(terms_in_result[term] - terms_in_query[term])**2 for term in terms_in_result.keys()]))
+    return math.sqrt(sum([min(1, ((terms_in_result[term] - terms_in_query[term])**2/terms_weights[term])) for term in terms_in_result.keys()]))
 
 
-def jaccard_similarity(terms_in_query, terms_in_result):
+def jaccard_similarity(terms_in_query, terms_in_result, terms_weights):
+    if len(terms_weights.values()) == 0:
+        sum_of_appearances_of_terms = len(terms_in_query.keys())
+    else:
+        sum_of_appearances_of_terms = sum(terms_weights.values())
     words_in_both_query_and_result = 0
     for term in terms_in_result.keys():
         if terms_in_result[term] > 0 and terms_in_query[term] > 0:
-            words_in_both_query_and_result += 1
-    return words_in_both_query_and_result*1.0/len(terms_in_query.keys())
+            if term not in terms_weights.keys():
+                words_in_both_query_and_result += 1
+            else:
+                words_in_both_query_and_result += terms_weights[term]
+    return words_in_both_query_and_result * 1.0 / sum_of_appearances_of_terms
 
 
-def measure_similarity(documents, query, result, content_describing_method, comparison_method):
+def update_weights(weights_of_terms, terms):
+    for term in terms:
+        if term not in weights_of_terms.keys():
+            weights_of_terms[term] = 1
+    return weights_of_terms
+
+
+def measure_similarity(documents, query, result, content_describing_method, comparison_method, weights_of_terms):
     """
-
     :param documents: all the documents
     :param query: search query
     :param result: one particular document to be compared with query
     :param content_describing_method: name of method used to describe content of document
     :param comparison_method: name of method to use to compare document and query
+    :param weights_of_terms: dictionary with terms and their weights, provided by the user
     :return: number [0:1] indicating how similar query and document are
     """
+    updated_weights = {}
     result_as_a_list = parse_query(result['title'])
     possibles = globals().copy()
     possibles.update(locals())
     describe = possibles.get(content_describing_method)
     terms_in_query, terms_in_result = describe(documents, query, result_as_a_list)
+    if len(weights_of_terms.keys()) != 0:
+        updated_weights = update_weights(weights_of_terms, terms_in_query.keys())
     comparing = possibles.get(comparison_method)
-    return comparing(terms_in_query, terms_in_result)
+    return comparing(terms_in_query, terms_in_result, updated_weights)
 
 
 def term_frequency(documents, query, result_as_a_list):
@@ -91,9 +112,40 @@ def parse_query(query):
     return stemmed_query
 
 
+def create_matrix_from_ranking(reference_ranking):
+    matrix = list()
+    for i in range(len(reference_ranking)):
+        matrix.append([0]*len(reference_ranking))
+    # print(matrix)
+    for index, element in enumerate(reference_ranking):
+        for elem in reference_ranking[index:]:
+            if elem != element:
+                matrix[element][elem] = 1
+    print(matrix)
+    return matrix
+
+
+def kendall_distance(reference_matrix, actual_matrix):
+    return 0.5 * sum([abs(reference_matrix[i][j] - actual_matrix[i][j]) for i in range(len(reference_matrix)) for j in range(len(reference_matrix))])
+
+
+def compute_kendall_tau(reference_ranking, actual_ranking):
+    """
+    Compute Kendall's tau between two ranking.
+    :param reference_ranking: ranking of documents, which we wanted to acquire
+    :param actual_ranking: the ranking returned by filtering [5, 2, 4, 1, 3] - IDs in list
+    """
+    reference_matrix = create_matrix_from_ranking(reference_ranking)
+    actual_matrix = create_matrix_from_ranking(actual_ranking)
+    distance_between_matrices = kendall_distance(reference_matrix, actual_matrix)
+    print(distance_between_matrices)
+    return 1 - 4*(distance_between_matrices/(len(reference_matrix)*(len(reference_matrix)-1)))
+
+
 if __name__ == '__main__':
-    print(term_frequency([], ['aa', 'ab', 'ac', 'aa', 'ad'],['aa', 'ba', 'bb', 'ac']))
-    print(jaccard_similarity({'aa': 0.4, 'ab': 0.2, 'ad': 0.2, 'ba': 0.0, 'bb': 0.0, 'ac': 0.2}, {'aa': 0.25, 'ab': 0.0, 'ad': 0.0, 'ba': 0.25, 'bb': 0.25, 'ac': 0.25}))
+    # print(term_frequency([], ['aa', 'ab', 'ac', 'aa', 'ad'],['aa', 'ba', 'bb', 'ac']))
+    # print(jaccard_similarity({'aa': 0.4, 'ab': 0.2, 'ad': 0.2, 'ba': 0.0, 'bb': 0.0, 'ac': 0.2}, {'aa': 0.25, 'ab': 0.0, 'ad': 0.0, 'ba': 0.25, 'bb': 0.25, 'ac': 0.25}))
+    print(compute_kendall_tau([2, 1, 0], [0, 1, 2]))
     # There is a working example of tfidf
     # print(term_frequency_inverse_document_frequency([['aa', 'ab', 'ac'], ['aa', 'ab', 'aa'], ['aa', 'ad', 'ab', 'ac', 'ad'], ['ab','ab','ab']], ['aa', 'ab', 'ac'], {'title': 'aa ad ab ac ad'}))
     # print(1/3*math.log(5/3), 1/3*math.log(5/4), 1/3*math.log(5/2))
