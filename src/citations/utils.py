@@ -130,7 +130,7 @@ def kendall_distance(reference_matrix, actual_matrix):
 
 def compute_kendall_tau(reference_ranking, actual_ranking):
     """
-    Compute Kendall's tau between two ranking.
+    Compute Kendall's tau between two ranking. These rankings must consist of number from 0 to x, like [0,2,1,4,3]
     :param reference_ranking: ranking of documents, which we wanted to acquire
     :param actual_ranking: the ranking returned by filtering [5, 2, 4, 1, 3] - IDs in list
     """
@@ -142,25 +142,36 @@ def compute_kendall_tau(reference_ranking, actual_ranking):
 
 
 def rocchios_method(alpha, beta, gamma, query_as_a_vector, list_of_relevant_documents_vectors, list_of_unrelevant_documents_vectors):
-    query_as_a_vector_times_alpha = [value * alpha for value in query_as_a_vector]
-    relevant_documents_times_beta = [0]*len(list_of_relevant_documents_vectors[0])
-    if len(list_of_unrelevant_documents_vectors) > 0:
-        unrelevant_documents_times_gamma = [0] * len(list_of_unrelevant_documents_vectors[0])
+    """
+    Compute new query vector, given query, some relevant documents (dicts returned from tfidf or tf functions) and unrelevant documents.
+    We multiply every value by specific parameter (alpha, beta or gamma)
+    :param alpha: query parameter
+    :param beta: relevant documents parameter
+    :param gamma: unrelevant documents parameter
+    :param query_as_a_vector: dict {term1: value1, term2: value2, ...}
+    :param list_of_relevant_documents_vectors: list of dicts
+    :param list_of_unrelevant_documents_vectors: list of dicts
+    :return: 
+    """
+    query_as_a_vector_times_alpha = {term: value * alpha for term, value in query_as_a_vector.items()}
+    relevant_documents_times_beta = {}
+    unrelevant_documents_times_gamma = {}
     for vector in list_of_relevant_documents_vectors:
-        for index, value in enumerate(vector):
-            relevant_documents_times_beta[index] += beta * value
+        for term, value in vector.items():
+            relevant_documents_times_beta[term] = relevant_documents_times_beta.get(term, 0) + beta * value
+            print(relevant_documents_times_beta[term], term)
+    print(relevant_documents_times_beta)
     if len(list_of_unrelevant_documents_vectors) > 0:
-
         for vector in list_of_unrelevant_documents_vectors:
-            for index, value in enumerate(vector):
-                unrelevant_documents_times_gamma[index] += gamma * value
-    new_query_vector = [0]*len(query_as_a_vector)
+            for term, value in vector.items():
+                unrelevant_documents_times_gamma[term] = unrelevant_documents_times_gamma.get(term, 0) + gamma * value
+    new_query_vector = {}
     if len(list_of_unrelevant_documents_vectors) > 0:
-        for index in range(len(new_query_vector)):
-            new_query_vector[index] += query_as_a_vector_times_alpha[index] + relevant_documents_times_beta[index] + unrelevant_documents_times_gamma[index]
+        for index in query_as_a_vector.keys():
+            new_query_vector[index] = query_as_a_vector_times_alpha[index] + relevant_documents_times_beta[index] + unrelevant_documents_times_gamma[index]
     else:
-        for index in range(len(new_query_vector)):
-            new_query_vector[index] += query_as_a_vector_times_alpha[index] + relevant_documents_times_beta[index]
+        for index in query_as_a_vector.keys():
+            new_query_vector[index] = query_as_a_vector_times_alpha[index] + relevant_documents_times_beta[index]
     return new_query_vector
 
 
@@ -176,4 +187,8 @@ if __name__ == '__main__':
     # print(([], ['cancer', 'symptom'], {"title": "cancer lol lol lol lol lol"}, "cos"))
     # print(([], ["cancer", "cancer", "boom", "trick"], {"title": "cancer boom lol cool boom thing"}, "cos"))
     # print(euclidean_distance_similarity({'a': 0.0, 'b': 0.0}, {'a': 1.0, 'b': 1.0}))
-    print(rocchios_method(1, 0.5, 0, [0,0,0,0.932,0.363], [[0,0,0,0,0],[0,0,0.559,0.0],[0.89,0,0,0,0]], []))
+    print(rocchios_method(1, 0.5, 0, {'a': 0, 'b': 0, 'c': 0, 'd': 0.932, 'e': 0.363},
+                          [{'a': 0, 'b': 0, 'c': 0, 'd': 0, 'e': 0},
+                          {'a': 0, 'b': 0, 'c': 0.559, 'd': 0, 'e': 0},
+                          {'a': 0.89, 'b': 0, 'c': 0, 'd': 0, 'e': 0}],
+                          []))

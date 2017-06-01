@@ -23,7 +23,6 @@ class CitationIndexViewSet(HaystackViewSet):
         filtering_method = self.request.query_params['filtering_method']
         comparison_method = self.request.query_params['comparison_method']
         query = self.request.query_params.getlist('title')
-
         found_articles = response.data
         terms_weights = {term: self.request.query_params.get(term, 0) for term in query}
         all_titles = Citation.objects.values_list('title', flat=True)
@@ -36,6 +35,12 @@ class CitationIndexViewSet(HaystackViewSet):
                                                                  content_describing_method =DESCRIBING_METHODS[filtering_method],
                                                                  comparison_method=COMPARISON_METHODS[comparison_method],
                                                                  weights_of_terms=terms_weights))
-        response.data = {'results': found_articles, 'terms_weights': terms_weights}
+        measures = {}
+        for article in found_articles:
+            measures[article['pmid']] = measure_similarity(all_titles, query, article,
+                                                           DESCRIBING_METHODS[filtering_method],
+                                                           COMPARISON_METHODS[comparison_method],
+                                                           terms_weights)
+        response.data = {'results': found_articles, 'terms_weights': terms_weights, 'measures': measures}
         return response
 
