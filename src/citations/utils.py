@@ -3,14 +3,15 @@ import nltk
 from nltk.corpus import stopwords
 
 # from search.utils import DESCRIBING_METHODS, COMPARISON_METHODS
-DESCRIBING_METHODS = {'tf': 'term_frequency', 'tfidf': 'term_frequency_inverse_document_frequency'}
-COMPARISON_METHODS = {'cos': 'cosine_similarity', 'euc': 'euclidean_distance_similarity', 'jac': 'jaccard_similarity'}
+DESCRIBING_METHODS = {'term_frequency': 'term_frequency', 'term_frequency_inverse_document_frequency': 'term_frequency_inverse_document_frequency'}
+COMPARISON_METHODS = {'cosine_similarity': 'cosine_similarity', 'euclidean_distance_similarity': 'euclidean_distance_similarity', 'jaccard_similarity': 'jaccard_similarity'}
 
 
 def length_of_vector(terms_and_values, terms_weights):
+    # import pdb; pdb.set_trace()
     if len(terms_weights.values()) == 0:
         return math.sqrt(sum([x*x for x in terms_and_values.items()]))
-    return math.sqrt(sum([min(1, x*x/terms_weights[term]) for term, x in terms_and_values.items()]))
+    return math.sqrt(sum([min(1, x*x/(float(terms_weights[term]) or 0.1)) for term, x in terms_and_values.items()]))
 
 
 def cosine_similarity(terms_in_query, terms_in_result, terms_weights):
@@ -25,7 +26,7 @@ def euclidean_distance_similarity(terms_in_query, terms_in_result, terms_weights
     """
     if len(terms_weights.values()) == 0:
         return math.sqrt(sum([(terms_in_result[term] - terms_in_query[term])**2 for term in terms_in_result.keys()]))
-    return math.sqrt(sum([min(1, ((terms_in_result[term] - terms_in_query[term])**2/terms_weights[term])) for term in terms_in_result.keys()]))
+    return math.sqrt(sum([min(1, ((terms_in_result[term] - terms_in_query[term])**2/( float(terms_weights[term]) or 0.1))) for term in terms_in_result.keys()]))
 
 
 def jaccard_similarity(terms_in_query, terms_in_result, terms_weights):
@@ -39,11 +40,13 @@ def jaccard_similarity(terms_in_query, terms_in_result, terms_weights):
             if term not in terms_weights.keys():
                 words_in_both_query_and_result += 1
             else:
-                words_in_both_query_and_result += terms_weights[term]
+                words_in_both_query_and_result += float(terms_weights[term])
     return words_in_both_query_and_result * 1.0 / sum_of_appearances_of_terms
 
 
-def update_weights(weights_of_terms, terms):
+def update_weights(weights_of_terms_param, terms):
+    # import pdb; pdb.set_trace()
+    weights_of_terms = weights_of_terms_param
     for term in terms:
         if term not in weights_of_terms.keys():
             weights_of_terms[term] = 1
