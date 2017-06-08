@@ -41,6 +41,7 @@ def jaccard_similarity(terms_in_query, terms_in_result, terms_weights):
                 words_in_both_query_and_result += 1
             else:
                 words_in_both_query_and_result += float(terms_weights[term])
+    print( words_in_both_query_and_result * 1.0 / sum_of_appearances_of_terms)
     return words_in_both_query_and_result * 1.0 / sum_of_appearances_of_terms
 
 

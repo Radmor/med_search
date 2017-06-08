@@ -18,13 +18,17 @@ class CitationIndexViewSet(HaystackViewSet):
     index_models = (Citation,)
     serializer_class = CitationIndexSerializer
 
+    def ids_to_titles(self, ids):
+        return Citation.objects.filter(pmid__in=ids).values_list('title', flat=True)
+
     def list(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
         filtering_method = self.request.query_params['filtering_method']
         comparison_method = self.request.query_params['comparison_method']
         query = self.request.query_params.getlist('title')
+        ids = self.request.query_params.getlist('ids')
+        relevant_titles = self.ids_to_titles(ids)
 
-        # import pdb; pdb.set_trace()
         found_articles = response.data
         terms_weights = {term: float(self.request.query_params.get(term, 0)) for term in query}
         terms_weights_bis = {term: self.request.query_params.get(term, 0) for term in query}
@@ -47,6 +51,6 @@ class CitationIndexViewSet(HaystackViewSet):
                                                            DESCRIBING_METHODS[filtering_method],
                                                            COMPARISON_METHODS[comparison_method],
                                                            terms_weights)
-        response.data = {'results': found_articles, 'terms_weights': terms_weights_bis, 'measures': measures}
+        response.data = {'results': found_articles, 'terms_weights': terms_weights_bis, 'measures': measures, 'flags':{} }
         return response
 

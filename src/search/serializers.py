@@ -9,6 +9,7 @@ class SearchSerializer(serializers.Serializer):
         child=serializers.FloatField(),
         default={},
     )
+    flags = serializers.DictField(default={})
 
 
 class SearchConfigSerializer(serializers.Serializer):

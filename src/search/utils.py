@@ -26,12 +26,13 @@ def parse_query(query):
     return stemmed_query
 
 
-def parse_query_string(parsed_query, queried_fields):
+def parse_query_string(parsed_query, queried_fields, ids):
     query_string_dict = {}
     for queried_field in queried_fields:
         for query_item in parsed_query:
             query_string_dict = merge_dicts(query_string_dict,
                                             {queried_field:[query_item]})
+    query_string_dict.update({'ids':ids})
     return urllib.parse.urlencode(query_string_dict, True)
 
 
@@ -46,9 +47,9 @@ def join_with_next_parameter(query_string, field_name, field_value):
     return query_string + "&" + field_name + "=" + field_value
 
 
-def combine_redirect_url(redirect_url, query, filtering_method, comparison_method, terms_weights, queried_fields):
+def combine_redirect_url(redirect_url, query, filtering_method, comparison_method, terms_weights, queried_fields, ids):
     parsed_query = parse_query(query)
-    query_string = parse_query_string(parsed_query, queried_fields)
+    query_string = parse_query_string(parsed_query, queried_fields, ids)
     query_string = join_with_next_parameter(query_string, "filtering_method", filtering_method)
     query_string = join_with_next_parameter(query_string, "comparison_method", comparison_method)
     
