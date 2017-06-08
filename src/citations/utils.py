@@ -54,7 +54,24 @@ def update_weights(weights_of_terms_param, terms):
     return weights_of_terms
 
 
-def measure_similarity(documents, query, result, content_describing_method, comparison_method, weights_of_terms):
+def update_query(terms_in_query, relevant_titles):
+    list_of_vectors = []
+    for title in relevant_titles:
+        count = 0
+        new_dict = {}
+        for term in terms_in_query.keys():
+            new_dict[term] = 0
+        for word in title:
+            if word in new_dict.keys():
+                new_dict[word] += 1
+                count += 1
+        for term in new_dict.keys():
+            new_dict[term] /= count
+        list_of_vectors.append(new_dict)
+    return rocchios_method(1, 0.5, 0, terms_in_query, list_of_vectors, [])
+
+
+def measure_similarity(documents, query, result, content_describing_method, comparison_method, weights_of_terms, relevant_titles):
     """
     :param documents: all the documents
     :param query: search query
@@ -70,6 +87,8 @@ def measure_similarity(documents, query, result, content_describing_method, comp
     possibles.update(locals())
     describe = possibles.get(content_describing_method)
     terms_in_query, terms_in_result = describe(documents, query, result_as_a_list)
+    if len(relevant_titles) != 0:
+        terms_in_query = update_query(terms_in_query, relevant_titles)
     if len(weights_of_terms.keys()) != 0:
         updated_weights = update_weights(weights_of_terms, terms_in_query.keys())
     comparing = possibles.get(comparison_method)
